@@ -1,38 +1,37 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import {GUI} from 'dat.gui'
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { GUI } from 'dat.gui'
 /**
  * A class to set up some basic scene elements to minimize code in the
  * main execution file.
  */
 export default class BasicScene extends THREE.Scene{
   // A dat.gui class debugger that is added by default
-  debugger: GUI
+  private debugger: GUI
   // Setups a scene camera
-  camera: THREE.PerspectiveCamera
+  private camera: THREE.PerspectiveCamera
   // setup renderer
-  renderer: THREE.Renderer
+  private renderer: THREE.Renderer
   // setup Orbitals
-  orbitals: OrbitControls
+  private orbitals: OrbitControls
   // Holds the lights for easy reference
-  lights: Array<THREE.Light> = []
+  private lights: Array<THREE.Light> = []
   // Number of PointLight objects around origin
-  lightCount: number = 6
+  private lightCount: number = 6
   // Distance above ground place
-  lightDistance: number = 3
+  private lightDistance: number = 3
   // Get some basic params
-  width = window.innerWidth
-  height = window.innerHeight
-
-  test: any
-
-  loaderModel = new GLTFLoader()
-  loaderMaterial = new THREE.MaterialLoader()
+  private width = window.innerWidth
+  private height = window.innerHeight
+  // Some loaders
+  private loaderModel = new GLTFLoader()
+  private loaderMaterial = new THREE.MaterialLoader()
+  private loaderTexture = new THREE.TextureLoader()
   /**
    * Initializes the scene by adding lights, and the geometry
    */
-  initialize(debug: boolean = true, addGridHelper: boolean = true){
+  public initialize(debug: boolean = true, addGridHelper: boolean = true){
     // setup camera
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000)
     this.camera.position.z = 12
@@ -40,7 +39,7 @@ export default class BasicScene extends THREE.Scene{
     this.camera.position.x = 12
     // setup renderer
     this.renderer = new THREE.WebGLRenderer({
-      canvas: document.getElementById("app") as HTMLCanvasElement,
+      canvas: document.getElementById('app') as HTMLCanvasElement,
       alpha: true
     })
     this.renderer.setSize(this.width, this.height)
@@ -76,9 +75,11 @@ export default class BasicScene extends THREE.Scene{
         const model = gltf.scene
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
-            this.loaderMaterial.load('../assets/tumba/M_Wood_Normal.png',
-              material => {
-                (child as THREE.Mesh).material = material
+            this.loaderTexture.load('../assets/tumba/M_Wood_BaseColor.png',
+              texture => {
+                (child as THREE.Mesh).material = new THREE.MeshBasicMaterial({
+                  map: texture
+                })
               },
               xhr => {
                 console.log( (xhr.loaded / xhr.total * 100) + '% loaded material' )
@@ -88,7 +89,7 @@ export default class BasicScene extends THREE.Scene{
               }
             )
           }
-        });
+        })
         this.add(model)
       },
       xhr => {
@@ -102,18 +103,26 @@ export default class BasicScene extends THREE.Scene{
     if (debug) {
       this.debugger =  new GUI()
       // Debug group with all lights in it.
-      const lightGroup = this.debugger.addFolder("Lights")
+      const lightGroup = this.debugger.addFolder('Lights')
       for(let i = 0; i < this.lights.length; i++){
         lightGroup.add(this.lights[i], 'visible', true)
       }
       lightGroup.open()
-
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera')
       cameraGroup.add(this.camera, 'fov', 20, 80)
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open()
     }
+  }
+  public cameraUpdateProjectionMatrix() {
+    this.camera.updateProjectionMatrix()
+  }
+  public rendererRender() {
+    this.renderer.render(this, this.camera)
+  }
+  public orbitalsUpdate() {
+    this.orbitals.update()
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the

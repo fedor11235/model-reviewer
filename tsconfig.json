@@ -5,11 +5,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "sourceMap": true,           // Added
-    "noImplicitAny": true,       // Added
-    "moduleResolution": "node",  // Added
-    "outDir": "dist",            // Added
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "outDir": "dist"
   },
-  "include": [ "src/**/*.ts" ],  // Added
-  "exclude": [ "node_modules" ]  // Added
+  "include": [ "src/**/*.ts" ],
+  "exclude": [ "node_modules" ]
 }

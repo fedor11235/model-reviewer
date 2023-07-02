@@ -4,9 +4,9 @@ let scene = new BasicScene();
 scene.initialize();
 // loops updates
 function loop(){
-  scene.camera.updateProjectionMatrix();
-  scene.renderer.render(scene, scene.camera);
-  scene.orbitals.update()
+  scene.cameraUpdateProjectionMatrix()
+  scene.rendererRender()
+  scene.orbitalsUpdate()
   requestAnimationFrame(loop)
 }
 // runs a continuous loop
