@@ -2,6 +2,10 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GUI } from 'dat.gui'
+type test = {
+  materialModel: THREE.Material | null
+  textureModel: THREE.Texture | null
+}
 /**
  * A class to set up some basic scene elements to minimize code in the
  * main execution file.
@@ -28,6 +32,23 @@ export default class BasicScene extends THREE.Scene{
   private loaderModel = new GLTFLoader()
   private loaderMaterial = new THREE.MaterialLoader()
   private loaderTexture = new THREE.TextureLoader()
+  // Params model
+  private model: THREE.Group
+  private modelParams:test = {
+    materialModel: null,
+    textureModel: null
+  }
+  // Options for change
+  private options = {
+    colors: {
+      green: '#C9F76F',
+      red: '#E667AF'
+    },
+    textures: {
+      base: 'M_Wood_BaseColor',
+      normal: 'M_Wood_Normal',
+    }
+  }
   /**
    * Initializes the scene by adding lights, and the geometry
    */
@@ -55,7 +76,7 @@ export default class BasicScene extends THREE.Scene{
       this.add(new THREE.AxesHelper(3))
     }
     // set the background color
-    this.background = new THREE.Color(0xefefef)
+    this.background = new THREE.Color(this.options.colors.green)
     // create the lights
     for (let i = 0; i < this.lightCount; i++){
       // Positions evenly in a circle pointed at the origin
@@ -72,25 +93,11 @@ export default class BasicScene extends THREE.Scene{
     }
     this.loaderModel.load('../assets/tumba/scene.gltf',
       gltf => {
-        const model = gltf.scene
-        model.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            this.loaderTexture.load('../assets/tumba/M_Wood_BaseColor.png',
-              texture => {
-                (child as THREE.Mesh).material = new THREE.MeshBasicMaterial({
-                  map: texture
-                })
-              },
-              xhr => {
-                console.log( (xhr.loaded / xhr.total * 100) + '% loaded material' )
-              },
-              err => {
-                console.log(err)
-              }
-            )
-          }
+        this.model = gltf.scene
+        this.model.traverse((child) => {
+          this.setModeleTexture(this.options.textures.base)
         })
-        this.add(model)
+        this.add(this.model)
       },
       xhr => {
         console.log( (xhr.loaded / xhr.total * 100) + '% loaded model' )
@@ -113,7 +120,40 @@ export default class BasicScene extends THREE.Scene{
       cameraGroup.add(this.camera, 'fov', 20, 80)
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open()
+      this.debugger.addFolder
+      // Add color to debugger
+      const backgroundGroup = this.debugger.addFolder('Background')
+      backgroundGroup.add(this, 'background', this.options.colors)
+        .onChange((color) => this.setSceneColor(color))
+      backgroundGroup.open()
+      const modelGroup = this.debugger.addFolder('Changing model parameters')
+      modelGroup.add(this.modelParams, 'textureModel', this.options.textures)
+        .onChange((texture) => this.setModeleTexture(texture))
+      modelGroup.open()
     }
+  }
+  private setSceneColor(color: string) {
+    this.background = new THREE.Color(color)
+  }
+  private setModeleTexture(texture: string) {
+    this.loaderTexture.load(`../assets/tumba/${texture}.png`,
+      texture => {
+        this.modelParams.textureModel = texture
+        this.model.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            ;(child as THREE.Mesh).material = new THREE.MeshBasicMaterial({
+              map: this.modelParams.textureModel
+            })
+          }
+        })
+      },
+      xhr => {
+        console.log( (xhr.loaded / xhr.total * 100) + '% loaded material' )
+      },
+      err => {
+        console.log(err)
+      }
+    )
   }
   public cameraUpdateProjectionMatrix() {
     this.camera.updateProjectionMatrix()
