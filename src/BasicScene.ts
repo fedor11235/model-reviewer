@@ -35,7 +35,7 @@ export default class BasicScene extends THREE.Scene{
     none: null
   }
   // Setup texture name
-  texturesName: string[] = [
+  private texturesName: string[] = [
     'none',
     'disturb.jpg',
     'colors.png',
@@ -45,6 +45,12 @@ export default class BasicScene extends THREE.Scene{
   ]
   // Setup helpers
   private spotLightHelper: any
+  // Setup camera rotation
+  // private clock = new THREE.Clock()
+  // private angle = 0 // текущий угол
+  // private angularSpeed = THREE.MathUtils.degToRad(20)
+  // private delta = 0
+  // private radius = 20
   /**
    * Initializes the scene by adding lights, and the geometry
    */
@@ -52,12 +58,12 @@ export default class BasicScene extends THREE.Scene{
     // Setup camera
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000)
     this.camera.position.set( 7, 4, 1 )
+
     // Setup renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas: document.getElementById('app') as HTMLCanvasElement,
       alpha: true
     });
-
     (this.renderer as any).shadowMap.enabled = true
     ;(this.renderer as any).shadowMap.type = THREE.PCFSoftShadowMap
     ;(this.renderer as any).toneMapping = THREE.ACESFilmicToneMapping
@@ -72,6 +78,11 @@ export default class BasicScene extends THREE.Scene{
     this.orbitals.maxDistance = 10;
     this.orbitals.maxPolarAngle = Math.PI / 2;
     this.orbitals.target.set( 0, 1, 0 );
+    this.orbitals.autoRotate = true
+    this.orbitals.enableZoom = false
+    this.orbitals.enablePan = false
+    this.orbitals.enableDamping = false
+    this.orbitals.enabled = false
     // Set global illumination
     const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 );
     this.add( ambient );
@@ -84,7 +95,6 @@ export default class BasicScene extends THREE.Scene{
     }
     // Set path textures
     const loader = new THREE.TextureLoader().setPath( '../assets/textures/' )
-    
     for (const filename of this.texturesName) {
       const texture = loader.load(filename)
       texture.minFilter = THREE.LinearFilter
@@ -108,7 +118,7 @@ export default class BasicScene extends THREE.Scene{
     this.spotLight.shadow.camera.near = 1;
     this.spotLight.shadow.camera.far = 10;
     this.spotLight.shadow.focus = 1;
-    // This.spotLight.shadow.camera.fov = 1
+    this.spotLight.shadow.camera.fov = 1
     this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight, 0xff9900)
     this.add(this.spotLight)
     this.add(this.spotLightHelper)
@@ -130,6 +140,7 @@ export default class BasicScene extends THREE.Scene{
         this.model.traverse(() => {
           this.setModeleTexture(this.textures['M_Wood_BaseColor.png'])
         })
+        // this.camera.lookAt(this.model.position)
         this.add(this.model)
       },
       xhr => {
@@ -224,12 +235,17 @@ export default class BasicScene extends THREE.Scene{
   public cameraUpdateProjectionMatrix() {
     this.camera.updateProjectionMatrix()
   }
-  public rendererRender() {
+  public render() {
     this.renderer.render(this, this.camera)
   }
   public updateElements() {
     this.orbitals.update()
     this.spotLightHelper.update()
+    // this.delta = this.clock.getDelta()
+  
+    // this.camera.position.x = Math.cos(this.angle) * this.radius
+    // this.camera.position.z = Math.sin(this.angle) * this.radius
+    // this.angle += this.angularSpeed * this.delta
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the
@@ -242,7 +258,7 @@ export default class BasicScene extends THREE.Scene{
     function onWindowResize(){
       // uses the global window widths and height
       camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
+      // camera.updateProjectionMatrix()
       renderer.setSize( window.innerWidth, window.innerHeight )
     }
   }

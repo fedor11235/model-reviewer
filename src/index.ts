@@ -5,7 +5,7 @@ scene.initialize();
 // loops updates
 function loop(){
   scene.cameraUpdateProjectionMatrix()
-  scene.rendererRender()
+  scene.render()
   scene.updateElements()
   requestAnimationFrame(loop)
 }
