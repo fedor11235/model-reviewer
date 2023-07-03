@@ -15,16 +15,12 @@ export default class BasicScene extends THREE.Scene{
   private debugger: GUI
   // Setups a scene camera
   private camera: THREE.PerspectiveCamera
-  // setup renderer
+  // Setup renderer
   private renderer: THREE.Renderer
-  // setup Orbitals
+  // Setup Orbitals
   private orbitals: OrbitControls
-  // Holds the lights for easy reference
-  private lights: Array<THREE.Light> = []
-  // Number of PointLight objects around origin
-  private lightCount: number = 6
-  // Distance above ground place
-  private lightDistance: number = 3
+  // Setup spotLight
+  private spotLight: THREE.SpotLight
   // Get some basic params
   private width = window.innerWidth
   private height = window.innerHeight
@@ -55,19 +51,30 @@ export default class BasicScene extends THREE.Scene{
   public initialize(debug: boolean = true, addGridHelper: boolean = true){
     // setup camera
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000)
-    this.camera.position.z = 12
-    this.camera.position.y = 12
-    this.camera.position.x = 12
+    this.camera.position.set( 7, 4, 1 )
     // setup renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas: document.getElementById('app') as HTMLCanvasElement,
       alpha: true
-    })
+    });
+
+    (this.renderer as any).shadowMap.enabled = true
+    ;(this.renderer as any).shadowMap.type = THREE.PCFSoftShadowMap
+    ;(this.renderer as any).toneMapping = THREE.ACESFilmicToneMapping
+    ;(this.renderer as any).toneMappingExposure = 1
+
     this.renderer.setSize(this.width, this.height)
     // add window resizing
     BasicScene.addWindowResizing(this.camera, this.renderer)
     // sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
+    this.orbitals.minDistance = 2;
+    this.orbitals.maxDistance = 10;
+    this.orbitals.maxPolarAngle = Math.PI / 2;
+    this.orbitals.target.set( 0, 1, 0 );
+    // ??
+    const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 );
+    this.add( ambient );
     // Adds an origin-centered grid for visual reference
     if (addGridHelper){
       // Adds a grid
@@ -75,27 +82,64 @@ export default class BasicScene extends THREE.Scene{
       // Adds an axis-helper
       this.add(new THREE.AxesHelper(3))
     }
+    // set path textures
+    const loader = new THREE.TextureLoader().setPath( '../assets/textures/' )
+    const filenames = [ 'disturb.jpg', 'colors.png', 'uv_grid_opengl.jpg' ]
+
+    const textures: any = { none: null };
+    
+    for ( let i = 0; i < filenames.length; i ++ ) {
+      const filename = filenames[ i ];
+      const texture = loader.load( filename );
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      textures[ filename ] = texture;
+    }
+    // set the spot light
+    this.spotLight = new THREE.SpotLight(0xffffff, 100)
+    this.spotLight.position.set(2.5, 5, 2.5)
+    this.spotLight.angle = Math.PI / 6
+    this.spotLight.penumbra = 1
+    this.spotLight.decay = 2
+    this.spotLight.distance = 0
+    this.spotLight.map = textures[ 'disturb.jpg' ]
+    this.spotLight.castShadow = true
+    this.spotLight.shadow.mapSize.width = 2
+    this.spotLight.shadow.mapSize.height = 2
+    this.spotLight.shadow.mapSize.width = 1024;
+    this.spotLight.shadow.mapSize.height = 1024;
+    this.spotLight.shadow.camera.near = 1;
+    this.spotLight.shadow.camera.far = 10;
+    this.spotLight.shadow.focus = 1;
+    // this.spotLight.shadow.camera.fov = 1
+    this.add(this.spotLight)
+    this.add(new THREE.SpotLightHelper(this.spotLight, 0xff9900))
+    // creat floor
+    const planeGeometry = new THREE.PlaneGeometry(20, 20)
+    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xcccccc})
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+    plane.position.set( 0, 0, 0 )
+    plane.rotation.x = - Math.PI / 2
+    plane.receiveShadow = true
+    this.add(plane)
     // set the background color
     this.background = new THREE.Color(this.options.colors.green)
-    // create the lights
-    for (let i = 0; i < this.lightCount; i++){
-      // Positions evenly in a circle pointed at the origin
-      const light = new THREE.PointLight(0xffffff, 1)
-      let lightX = this.lightDistance * Math.sin(Math.PI * 2 / this.lightCount * i)
-      let lightZ = this.lightDistance * Math.cos(Math.PI * 2 / this.lightCount * i)
-      // Create a light
-      light.position.set(lightX, this.lightDistance, lightZ)
-      light.lookAt(0, 0, 0)
-      this.add(light)
-      this.lights.push(light)
-      // Visual helpers to indicate light positions
-      this.add(new THREE.PointLightHelper(light, .5, 0xff9900))
-    }
+    // load model
     this.loaderModel.load('../assets/tumba/scene.gltf',
       gltf => {
+        // gltf.scale( 0.0024, 0.0024, 0.0024 );
+        // gltf.computeVertexNormals();
+
+        // const material = new THREE.MeshLambertMaterial();
+        // const mesh = new THREE.Mesh( gltf, material );
+
         this.model = gltf.scene
-        this.model.traverse((child) => {
-          this.setModeleTexture(this.options.textures.base)
+        this.model.rotation.y = - Math.PI / 2;
+        this.model.castShadow = true;
+        this.model.receiveShadow = true;
+        this.model.traverse(() => {
+          // this.setModeleTexture(this.options.textures.base)
         })
         this.add(this.model)
       },
@@ -108,28 +152,70 @@ export default class BasicScene extends THREE.Scene{
     )
     // setup Debugger
     if (debug) {
-      this.debugger =  new GUI()
-      // Debug group with all lights in it.
-      const lightGroup = this.debugger.addFolder('Lights')
-      for(let i = 0; i < this.lights.length; i++){
-        lightGroup.add(this.lights[i], 'visible', true)
+      const params = {
+        map: textures[ 'disturb.jpg' ],
+        'color spot light': this.spotLight.color.getHex(),
+        'color background': this.background.getHex(),
+        intensity: this.spotLight.intensity,
+        distance: this.spotLight.distance,
+        angle: this.spotLight.angle,
+        penumbra: this.spotLight.penumbra,
+        decay: this.spotLight.decay,
+        focus: this.spotLight.shadow.focus,
+        shadows: true
       }
-      lightGroup.open()
+      this.debugger =  new GUI()
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera')
       cameraGroup.add(this.camera, 'fov', 20, 80)
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open()
       this.debugger.addFolder
-      // Add color to debugger
+      // Add color background to debugger
       const backgroundGroup = this.debugger.addFolder('Background')
-      backgroundGroup.add(this, 'background', this.options.colors)
-        .onChange((color) => this.setSceneColor(color))
+      backgroundGroup.addColor(params, 'color background').onChange( val => {
+        this.background = new THREE.Color(val)
+      })
       backgroundGroup.open()
       const modelGroup = this.debugger.addFolder('Changing model parameters')
       modelGroup.add(this.modelParams, 'textureModel', this.options.textures)
         .onChange((texture) => this.setModeleTexture(texture))
       modelGroup.open()
+      // Add spot light to debugger
+      const spotLightGroup = this.debugger.addFolder('Spot light')
+      spotLightGroup.add( params, 'map', textures ).onChange( val => {
+        this.spotLight.map = val
+      })
+      spotLightGroup.addColor( params, 'color spot light' ).onChange( val => {
+        this.spotLight.color.setHex(val)
+      })
+      spotLightGroup.add( params, 'intensity', 0, 500 ).onChange( val => {
+        this.spotLight.intensity = val
+      })
+      spotLightGroup.add( params, 'distance', 50, 200 ).onChange( val => {
+        this.spotLight.distance = val
+      })
+      spotLightGroup.add( params, 'angle', 0, Math.PI / 3 ).onChange( val => {
+        this.spotLight.angle = val
+      })
+      spotLightGroup.add( params, 'penumbra', 0, 1 ).onChange( val => {
+        this.spotLight.penumbra = val
+      })
+      spotLightGroup.add( params, 'decay', 1, 2 ).onChange( val => {
+        this.spotLight.decay = val
+      })
+      spotLightGroup.add( params, 'focus', 0, 1 ).onChange( val => {
+        this.spotLight.shadow.focus = val;
+      })
+      spotLightGroup.add( params, 'shadows' ).onChange( val => {
+        (this.renderer as any).shadowMap.enabled = val;
+        this.traverse( (child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            ((child as THREE.Mesh).material as any).needsUpdate = true;
+          }
+        })
+      })
+      spotLightGroup.open()
     }
   }
   private setSceneColor(color: string) {
