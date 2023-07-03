@@ -2,17 +2,24 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GUI } from 'dat.gui'
-type test = {
-  materialModel: THREE.Material | null
-  textureModel: THREE.Texture | null
-}
+
 /**
  * A class to set up some basic scene elements to minimize code in the
  * main execution file.
  */
 export default class BasicScene extends THREE.Scene{
+  // Setups a model name
+  private ModelName: string
+  constructor(ModelName: string)  {
+    super()
+    this.ModelName = ModelName
+  }
   // A dat.gui class debugger that is added by default
   private debugger: GUI
+  // Setups a canvas camera
+  private canvas: HTMLCanvasElement
+  // Setups a plug camera
+  private plug: HTMLDivElement
   // Setups a scene camera
   private camera: THREE.PerspectiveCamera
   // Setup renderer
@@ -45,47 +52,54 @@ export default class BasicScene extends THREE.Scene{
   ]
   // Setup helpers
   private spotLightHelper: any
-  // Setup camera rotation
-  // private clock = new THREE.Clock()
-  // private angle = 0 // текущий угол
-  // private angularSpeed = THREE.MathUtils.degToRad(20)
-  // private delta = 0
-  // private radius = 20
   /**
    * Initializes the scene by adding lights, and the geometry
    */
   public initialize(debug: boolean = true, addGridHelper: boolean = true){
     // Setup camera
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000)
-    this.camera.position.set( 7, 4, 1 )
-
+    this.camera.position.set(7, 4, 1)
+    // Setup html
+    this.canvas = (document.getElementById('app') as HTMLCanvasElement)
+    this.plug = (document.getElementById('plug') as HTMLDivElement)
+    this.plug.style.backgroundImage = `url(assets/${this.ModelName}/plug.png)`
+    this.plug.addEventListener('click', () => {
+      if(this.orbitals) {
+        this.plug.style.display = 'none'
+        this.orbitals.autoRotate = true
+        setTimeout(() => {
+          this.plug.style.display = 'block'
+          this.orbitals.autoRotate = false
+          this.orbitals.maxPolarAngle = Math.PI / 2
+        }, 15000)
+      }
+    })
     // Setup renderer
     this.renderer = new THREE.WebGLRenderer({
-      canvas: document.getElementById('app') as HTMLCanvasElement,
+      canvas: this.canvas,
       alpha: true
-    });
-    (this.renderer as any).shadowMap.enabled = true
+    })
+    ;(this.renderer as any).shadowMap.enabled = true
     ;(this.renderer as any).shadowMap.type = THREE.PCFSoftShadowMap
     ;(this.renderer as any).toneMapping = THREE.ACESFilmicToneMapping
     ;(this.renderer as any).toneMappingExposure = 1
-
     this.renderer.setSize(this.width, this.height)
     // Add window resizing
     BasicScene.addWindowResizing(this.camera, this.renderer)
     // Sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
-    this.orbitals.minDistance = 2;
-    this.orbitals.maxDistance = 10;
-    this.orbitals.maxPolarAngle = Math.PI / 2;
-    this.orbitals.target.set( 0, 1, 0 );
-    this.orbitals.autoRotate = true
+    this.orbitals.minDistance = 2
+    this.orbitals.maxDistance = 10
+    this.orbitals.maxPolarAngle = Math.PI / 2
+    this.orbitals.target.set(0, 1, 0)
     this.orbitals.enableZoom = false
     this.orbitals.enablePan = false
     this.orbitals.enableDamping = false
     this.orbitals.enabled = false
+    // this.orbitals.an
     // Set global illumination
-    const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 );
-    this.add( ambient );
+    const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 )
+    this.add( ambient )
     // Adds an origin-centered grid for visual reference
     if (addGridHelper){
       // Adds a grid
@@ -113,11 +127,11 @@ export default class BasicScene extends THREE.Scene{
     this.spotLight.castShadow = true
     this.spotLight.shadow.mapSize.width = 2
     this.spotLight.shadow.mapSize.height = 2
-    this.spotLight.shadow.mapSize.width = 1024;
-    this.spotLight.shadow.mapSize.height = 1024;
-    this.spotLight.shadow.camera.near = 1;
-    this.spotLight.shadow.camera.far = 10;
-    this.spotLight.shadow.focus = 1;
+    this.spotLight.shadow.mapSize.width = 1024
+    this.spotLight.shadow.mapSize.height = 1024
+    this.spotLight.shadow.camera.near = 1
+    this.spotLight.shadow.camera.far = 10
+    this.spotLight.shadow.focus = 1
     this.spotLight.shadow.camera.fov = 1
     this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight, 0xff9900)
     this.add(this.spotLight)
@@ -133,7 +147,7 @@ export default class BasicScene extends THREE.Scene{
     // Set the background color
     this.background = new THREE.Color(0xcccccc)
     // Load model
-    this.loaderModel.load('../assets/tumba/scene.gltf',
+    this.loaderModel.load(`../assets/${this.ModelName}/scene.gltf`,
       gltf => {
         this.model = gltf.scene
         this.model.rotation.y = - Math.PI / 2
@@ -210,10 +224,10 @@ export default class BasicScene extends THREE.Scene{
         this.spotLight.shadow.focus = focus
       })
       spotLightGroup.add(params, 'shadows').onChange( shadow => {
-        (this.renderer as any).shadowMap.enabled = shadow;
+        (this.renderer as any).shadowMap.enabled = shadow
         this.traverse( (child) => {
           if ((child as THREE.Mesh).isMesh) {
-            ((child as THREE.Mesh).material as any).needsUpdate = true;
+            ((child as THREE.Mesh).material as any).needsUpdate = true
           }
         })
       })
@@ -241,11 +255,6 @@ export default class BasicScene extends THREE.Scene{
   public updateElements() {
     this.orbitals.update()
     this.spotLightHelper.update()
-    // this.delta = this.clock.getDelta()
-  
-    // this.camera.position.x = Math.cos(this.angle) * this.radius
-    // this.camera.position.z = Math.sin(this.angle) * this.radius
-    // this.angle += this.angularSpeed * this.delta
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the

@@ -1,13 +1,17 @@
-import BasicScene from "./BasicScene";
-// sets up the scene
-let scene = new BasicScene();
+import BasicScene from './BasicScene'
+// Get name model
+const params = (new URL(window.location as any)).searchParams
+const modelName = params.get('model')
+
+// Sets up the scene
+let scene = new BasicScene(modelName);
 scene.initialize();
-// loops updates
+// Loops updates
 function loop(){
   scene.cameraUpdateProjectionMatrix()
   scene.render()
   scene.updateElements()
   requestAnimationFrame(loop)
 }
-// runs a continuous loop
+// Runs a continuous loop
 loop()
