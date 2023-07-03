@@ -128,18 +128,10 @@ export default class BasicScene extends THREE.Scene{
     // load model
     this.loaderModel.load('../assets/tumba/scene.gltf',
       gltf => {
-        // gltf.scale( 0.0024, 0.0024, 0.0024 );
-        // gltf.computeVertexNormals();
-
-        // const material = new THREE.MeshLambertMaterial();
-        // const mesh = new THREE.Mesh( gltf, material );
-
         this.model = gltf.scene
-        this.model.rotation.y = - Math.PI / 2;
-        this.model.castShadow = true;
-        this.model.receiveShadow = true;
+        this.model.rotation.y = - Math.PI / 2
         this.model.traverse(() => {
-          // this.setModeleTexture(this.options.textures.base)
+          this.setModeleTexture(this.options.textures.base)
         })
         this.add(this.model)
       },
@@ -173,42 +165,43 @@ export default class BasicScene extends THREE.Scene{
       this.debugger.addFolder
       // Add color background to debugger
       const backgroundGroup = this.debugger.addFolder('Background')
-      backgroundGroup.addColor(params, 'color background').onChange( val => {
-        this.background = new THREE.Color(val)
+      backgroundGroup.addColor(params, 'color background').onChange( color => {
+        this.background = new THREE.Color(color)
       })
       backgroundGroup.open()
       const modelGroup = this.debugger.addFolder('Changing model parameters')
-      modelGroup.add(this.modelParams, 'textureModel', this.options.textures)
-        .onChange((texture) => this.setModeleTexture(texture))
+      modelGroup.add(this.modelParams, 'textureModel', this.options.textures).onChange( texture => {
+        this.setModeleTexture(texture)
+      })
       modelGroup.open()
       // Add spot light to debugger
       const spotLightGroup = this.debugger.addFolder('Spot light')
-      spotLightGroup.add( params, 'map', textures ).onChange( val => {
-        this.spotLight.map = val
+      spotLightGroup.add( params, 'map', textures ).onChange( texture => {
+        this.spotLight.map = texture
       })
-      spotLightGroup.addColor( params, 'color spot light' ).onChange( val => {
-        this.spotLight.color.setHex(val)
+      spotLightGroup.addColor( params, 'color spot light' ).onChange( color => {
+        this.spotLight.color.setHex(color)
       })
-      spotLightGroup.add( params, 'intensity', 0, 500 ).onChange( val => {
-        this.spotLight.intensity = val
+      spotLightGroup.add( params, 'intensity', 0, 500 ).onChange( intensity => {
+        this.spotLight.intensity = intensity
       })
-      spotLightGroup.add( params, 'distance', 50, 200 ).onChange( val => {
-        this.spotLight.distance = val
+      spotLightGroup.add( params, 'distance', 50, 200 ).onChange( distance => {
+        this.spotLight.distance = distance
       })
-      spotLightGroup.add( params, 'angle', 0, Math.PI / 3 ).onChange( val => {
-        this.spotLight.angle = val
+      spotLightGroup.add( params, 'angle', 0, Math.PI / 3 ).onChange( angle => {
+        this.spotLight.angle = angle
       })
-      spotLightGroup.add( params, 'penumbra', 0, 1 ).onChange( val => {
-        this.spotLight.penumbra = val
+      spotLightGroup.add( params, 'penumbra', 0, 1 ).onChange( penumbra => {
+        this.spotLight.penumbra = penumbra
       })
-      spotLightGroup.add( params, 'decay', 1, 2 ).onChange( val => {
-        this.spotLight.decay = val
+      spotLightGroup.add( params, 'decay', 1, 2 ).onChange( decay => {
+        this.spotLight.decay = decay
       })
-      spotLightGroup.add( params, 'focus', 0, 1 ).onChange( val => {
-        this.spotLight.shadow.focus = val;
+      spotLightGroup.add( params, 'focus', 0, 1 ).onChange( focus => {
+        this.spotLight.shadow.focus = focus;
       })
-      spotLightGroup.add( params, 'shadows' ).onChange( val => {
-        (this.renderer as any).shadowMap.enabled = val;
+      spotLightGroup.add( params, 'shadows' ).onChange( shadow => {
+        (this.renderer as any).shadowMap.enabled = shadow;
         this.traverse( (child) => {
           if ((child as THREE.Mesh).isMesh) {
             ((child as THREE.Mesh).material as any).needsUpdate = true;
@@ -218,18 +211,18 @@ export default class BasicScene extends THREE.Scene{
       spotLightGroup.open()
     }
   }
-  private setSceneColor(color: string) {
-    this.background = new THREE.Color(color)
-  }
   private setModeleTexture(texture: string) {
     this.loaderTexture.load(`../assets/tumba/${texture}.png`,
       texture => {
         this.modelParams.textureModel = texture
         this.model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
-            ;(child as THREE.Mesh).material = new THREE.MeshBasicMaterial({
+            const material = new THREE.MeshLambertMaterial({
               map: this.modelParams.textureModel
             })
+            ;(child as THREE.Mesh).material = material
+            ;(child as THREE.Mesh).castShadow = true
+            ;(child as THREE.Mesh).receiveShadow = true
           }
         })
       },
