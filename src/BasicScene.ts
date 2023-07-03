@@ -28,11 +28,13 @@ export default class BasicScene extends THREE.Scene{
   private loaderModel = new GLTFLoader()
   private loaderMaterial = new THREE.MaterialLoader()
   private loaderTexture = new THREE.TextureLoader()
-  // Params model
+  // Setup model
   private model: THREE.Group
-  textures: any = {
+  // Setup textures
+  private textures: any = {
     none: null
   }
+  // Setup texture name
   texturesName: string[] = [
     'none',
     'disturb.jpg',
@@ -41,6 +43,8 @@ export default class BasicScene extends THREE.Scene{
     'M_Wood_BaseColor.png',
     'M_Wood_Normal.png'
   ]
+  // Setup helpers
+  private spotLightHelper: any
   /**
    * Initializes the scene by adding lights, and the geometry
    */
@@ -105,8 +109,9 @@ export default class BasicScene extends THREE.Scene{
     this.spotLight.shadow.camera.far = 10;
     this.spotLight.shadow.focus = 1;
     // This.spotLight.shadow.camera.fov = 1
+    this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight, 0xff9900)
     this.add(this.spotLight)
-    this.add(new THREE.SpotLightHelper(this.spotLight, 0xff9900))
+    this.add(this.spotLightHelper)
     // Creat floor
     const planeGeometry = new THREE.PlaneGeometry(20, 20)
     const planeMaterial = new THREE.MeshLambertMaterial({color: 0xcccccc})
@@ -222,8 +227,9 @@ export default class BasicScene extends THREE.Scene{
   public rendererRender() {
     this.renderer.render(this, this.camera)
   }
-  public orbitalsUpdate() {
+  public updateElements() {
     this.orbitals.update()
+    this.spotLightHelper.update()
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the

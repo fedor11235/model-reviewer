@@ -6,7 +6,7 @@ scene.initialize();
 function loop(){
   scene.cameraUpdateProjectionMatrix()
   scene.rendererRender()
-  scene.orbitalsUpdate()
+  scene.updateElements()
   requestAnimationFrame(loop)
 }
 // runs a continuous loop
