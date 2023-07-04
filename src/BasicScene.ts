@@ -64,13 +64,15 @@ export default class BasicScene extends THREE.Scene{
     this.plug = (document.getElementById('plug') as HTMLDivElement)
     this.plug.style.backgroundImage = `url(assets/${this.ModelName}/plug.png)`
     this.plug.addEventListener('click', () => {
-      if(this.orbitals) {
+      if(this.orbitals && this.model) {
         this.plug.style.display = 'none'
         this.orbitals.autoRotate = true
+        this.model.visible = true
         setTimeout(() => {
           this.plug.style.display = 'block'
           this.orbitals.autoRotate = false
           this.orbitals.maxPolarAngle = Math.PI / 2
+          this.model.visible = false
         }, 15000)
       }
     })
@@ -151,6 +153,7 @@ export default class BasicScene extends THREE.Scene{
       gltf => {
         this.model = gltf.scene
         this.model.rotation.y = - Math.PI / 2
+        this.model.visible = false
         this.model.traverse(() => {
           this.setModeleTexture(this.textures['M_Wood_BaseColor.png'])
         })
