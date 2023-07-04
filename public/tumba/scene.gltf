@@ -1,0 +1,167 @@
+{
+	"asset":
+	{
+		"version": "2.0",
+		"generator": "Unreal Engine 5.2.0"
+	},
+	"scene": 0,
+	"accessors": [
+		{
+			"bufferView": 0,
+			"count": 372,
+			"type": "SCALAR",
+			"componentType": 5121
+		},
+		{
+			"bufferView": 1,
+			"count": 189,
+			"type": "VEC3",
+			"componentType": 5126,
+			"min": [ -0.299999982, -1.18260002e-11, -0.174999997 ],
+			"max": [ 0.299999982, 0.399999976, 0.174999997 ]
+		},
+		{
+			"bufferView": 2,
+			"count": 189,
+			"type": "VEC3",
+			"componentType": 5126
+		},
+		{
+			"bufferView": 3,
+			"count": 189,
+			"type": "VEC4",
+			"componentType": 5126
+		},
+		{
+			"bufferView": 4,
+			"count": 189,
+			"type": "VEC2",
+			"componentType": 5126
+		},
+		{
+			"bufferView": 5,
+			"count": 189,
+			"type": "VEC2",
+			"componentType": 5126
+		}
+	],
+	"buffers": [
+		{
+			"uri": "scene.bin",
+			"byteLength": 10956
+		}
+	],
+	"bufferViews": [
+		{
+			"buffer": 0,
+			"byteLength": 372,
+			"target": 34963
+		},
+		{
+			"buffer": 0,
+			"byteLength": 2268,
+			"byteOffset": 372,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 2268,
+			"byteOffset": 2640,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 3024,
+			"byteOffset": 4908,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 1512,
+			"byteOffset": 7932,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 1512,
+			"byteOffset": 9444,
+			"target": 34962
+		}
+	],
+	"images": [
+		{
+			"uri": "M_Wood_BaseColor.png"
+		},
+		{
+			"uri": "M_Wood_Normal.png"
+		}
+	],
+	"materials": [
+		{
+			"name": "M_Wood",
+			"pbrMetallicRoughness":
+			{
+				"baseColorTexture":
+				{
+					"index": 0
+				},
+				"metallicFactor": 0,
+				"roughnessFactor": 0.270588249
+			},
+			"normalTexture":
+			{
+				"index": 1
+			},
+			"alphaMode": "MASK",
+			"alphaCutoff": 0.333299994,
+			"doubleSided": true
+		}
+	],
+	"meshes": [
+		{
+			"name": "SM_R2_SideTable",
+			"primitives": [
+				{
+					"attributes":
+					{
+						"POSITION": 1,
+						"NORMAL": 2,
+						"TANGENT": 3,
+						"TEXCOORD_0": 4,
+						"TEXCOORD_1": 5
+					},
+					"indices": 0,
+					"material": 0
+				}
+			]
+		}
+	],
+	"nodes": [
+		{
+			"mesh": 0
+		}
+	],
+	"samplers": [
+		{
+			"minFilter": 9987,
+			"magFilter": 9729
+		}
+	],
+	"scenes": [
+		{
+			"nodes": [ 0 ]
+		}
+	],
+	"textures": [
+		{
+			"name": "M_Wood_BaseColor",
+			"sampler": 0,
+			"source": 0
+		},
+		{
+			"name": "M_Wood_Normal",
+			"sampler": 0,
+			"source": 1
+		}
+	]
+}
