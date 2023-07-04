@@ -99,7 +99,7 @@ class BasicScene extends THREE.Scene {
         // Setup html
         this.canvas = document.getElementById('app');
         this.plug = document.getElementById('plug');
-        this.plug.style.backgroundImage = `url(assets/${this.ModelName}/plug.png)`;
+        this.plug.style.backgroundImage = `url(model-reviewer/assets/${this.ModelName}/plug.png)`;
         this.plug.addEventListener('click', () => {
             if (this.orbitals && this.model) {
                 this.plug.style.display = 'none';
