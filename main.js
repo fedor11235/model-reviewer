@@ -99,7 +99,7 @@ class BasicScene extends THREE.Scene {
         // Setup html
         this.canvas = document.getElementById('app');
         this.plug = document.getElementById('plug');
-        this.plug.style.backgroundImage = `url(assets/${this.ModelName}/plug.png)`;
+        this.plug.style.backgroundImage = `url(model-reviewer/assets/${this.ModelName}/plug.png)`;
         this.plug.addEventListener('click', () => {
             if (this.orbitals && this.model) {
                 this.plug.style.display = 'none';
@@ -147,7 +147,7 @@ class BasicScene extends THREE.Scene {
             this.add(new THREE.AxesHelper(3));
         }
         // Set path textures
-        const loader = new THREE.TextureLoader().setPath('../assets/textures/');
+        const loader = new THREE.TextureLoader().setPath('assets/textures/');
         for (const filename of this.texturesName) {
             const texture = loader.load(filename);
             texture.minFilter = THREE.LinearFilter;
@@ -186,7 +186,7 @@ class BasicScene extends THREE.Scene {
         // Set the background color
         this.background = new THREE.Color(0xcccccc);
         // Load model
-        this.loaderModel.load(`../assets/${this.ModelName}/scene.gltf`, gltf => {
+        this.loaderModel.load(`assets/${this.ModelName}/scene.gltf`, gltf => {
             this.model = gltf.scene;
             this.model.rotation.y = -Math.PI / 2;
             this.model.visible = false;
