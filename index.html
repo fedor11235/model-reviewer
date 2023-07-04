@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>MODEL REVIEWER</title>
+
+    <!-- loads some basic CSS resets and Styles -->
+    <style>
+      html, body, canvas {margin: 0;padding: 0;border: 0;}
+      canvas {display: block;}
+      body {overflow: hidden;}
+      #plug {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: url(assets/images/plug.png);
+        background-position: center;
+        background-size: cover;
+      }
+    </style>
+  </head>
+  <body>
+
+  <!-- application Canvas -->
+  <canvas id="app"></canvas>
+
+  <!-- plug -->
+  <div id="plug"></div>
+
+  <!-- this needs to be called here to ensure all elements are available -->
+  <script src="main.js" type="application/javascript"></script>
+
+  </body>
+</html>
