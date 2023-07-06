@@ -317,9 +317,9 @@ class BasicScene extends THREE.Scene {
         }, Math.random() * 3000 + 2000)
             .easing(TWEEN.Easing.Quadratic.Out).start();
         new TWEEN.Tween(light.position).to({
-            x: (Math.random() * 1) + 1.5,
+            x: (Math.random() * 3) + 1.5,
             // y: ( Math.random() * 1 ) + 1.5,
-            z: (Math.random() * 1) + 1.5,
+            z: (Math.random() * 3) + 1.5,
         }, Math.random() * 3000 + 2000)
             .easing(TWEEN.Easing.Quadratic.Out).start();
     }
