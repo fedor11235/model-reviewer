@@ -101,10 +101,10 @@ export default class BasicScene extends THREE.Scene{
     this.orbitals.maxDistance = 10
     this.orbitals.maxPolarAngle = Math.PI / 2
     this.orbitals.target.set(0, 1, 0)
-    this.orbitals.enableZoom = false
+    // this.orbitals.enableZoom = false
     this.orbitals.enablePan = false
     this.orbitals.enableDamping = false
-    this.orbitals.enabled = false
+    // this.orbitals.enabled = false
     // this.orbitals.an
     // Set global illumination
     const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 )
