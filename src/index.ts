@@ -6,11 +6,10 @@ const modelName = params.get('model')
 // Sets up the scene
 let scene = new BasicScene(modelName);
 scene.initialize();
+scene.animate();
 // Loops updates
 function loop(){
-  scene.cameraUpdateProjectionMatrix()
   scene.render()
-  scene.updateElements()
   requestAnimationFrame(loop)
 }
 // Runs a continuous loop

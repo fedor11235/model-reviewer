@@ -13,7 +13,8 @@ module.exports = {
   },
   resolve: {
     alias: {
-      three: path.resolve('./node_modules/three')
+      three: path.resolve('./node_modules/three'),
+      tween: path.resolve('@tweenjs/tween.js')
     },
     extensions: ['.tsx', '.ts', '.js', '.jsx']
   },

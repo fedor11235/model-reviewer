@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as TWEEN from '../plugins/tween.js'
 import { GUI } from 'dat.gui'
 
 /**
@@ -66,18 +67,24 @@ export default class BasicScene extends THREE.Scene{
     this.plug.addEventListener('click', () => {
       if(this.orbitals && this.model) {
         this.plug.style.display = 'none'
-        this.orbitals.autoRotate = true
+        // this.orbitals.autoRotate = true
         this.model.visible = true
         setTimeout(() => {
           this.plug.style.display = 'block'
-          this.orbitals.autoRotate = false
+          // this.orbitals.autoRotate = false
           this.orbitals.maxPolarAngle = Math.PI / 2
+
+          const strMime = 'image/jpeg'
+          const imgData = this.renderer.domElement.toDataURL(strMime);
+
+          this.plug.style.backgroundImage = `url(${imgData})`
           this.model.visible = false
         }, 15000)
       }
     })
     // Setup renderer
     this.renderer = new THREE.WebGLRenderer({
+      preserveDrawingBuffer: true,
       canvas: this.canvas,
       alpha: true
     })
@@ -146,6 +153,22 @@ export default class BasicScene extends THREE.Scene{
     plane.rotation.x = - Math.PI / 2
     plane.receiveShadow = true
     this.add(plane)
+    const hlight = new THREE.AmbientLight (0x404040, 1);
+    this.add(hlight);
+
+    //??????????????????????? test
+    // const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+    // directionalLight.position.set(-1000,1000,1000);
+    // this.add( directionalLight );
+
+    // const dirlight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
+    // dirlight2.position.set( -1000,-1000,-1000 );
+    // this.add( dirlight2 );
+
+    // const light3 = new THREE.PointLight( 0xffffff, 0.3, 10000 );
+    // light3.position.set( 1000,-1000,1000 );
+    // this.add( light3 );
+
     // Set the background color
     this.background = new THREE.Color(0xcccccc)
     // Load model
@@ -153,7 +176,7 @@ export default class BasicScene extends THREE.Scene{
       gltf => {
         this.model = gltf.scene
         this.model.rotation.y = - Math.PI / 2
-        this.model.visible = false
+        // this.model.visible = false
         this.model.traverse(() => {
           this.setModeleTexture(this.textures['M_Wood_BaseColor.png'])
         })
@@ -249,15 +272,30 @@ export default class BasicScene extends THREE.Scene{
       }
     })
   }
-  public cameraUpdateProjectionMatrix() {
-    this.camera.updateProjectionMatrix()
-  }
   public render() {
+    this.camera.updateProjectionMatrix()
     this.renderer.render(this, this.camera)
-  }
-  public updateElements() {
+    TWEEN.update()
     this.orbitals.update()
     this.spotLightHelper.update()
+  }
+  public tween(light: THREE.SpotLight) {
+    new TWEEN.Tween(light).to( {
+      angle: (Math.random() * 0.7) + 0.1,
+      penumbra: Math.random() + 1
+    }, Math.random() * 3000 + 2000)
+      .easing(TWEEN.Easing.Quadratic.Out).start();
+
+    new TWEEN.Tween( light.position ).to({
+      x: (Math.random() * 1) + 1.5,
+      // y: ( Math.random() * 1 ) + 1.5,
+      z: (Math.random() * 1) + 1.5,
+    }, Math.random() * 3000 + 2000)
+      .easing(TWEEN.Easing.Quadratic.Out).start();
+  }
+  public animate = () => {
+    this.tween(this.spotLight)
+    setTimeout(this.animate, 3000)
   }
   /**
    * Given a ThreeJS camera and renderer, resizes the scene if the
