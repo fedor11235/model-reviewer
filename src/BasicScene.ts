@@ -15,6 +15,8 @@ export default class BasicScene extends THREE.Scene{
     super()
     this.ModelName = ModelName
   }
+  // Setups grid helper
+  private addGridHelper = false
   // A dat.gui class debugger that is added by default
   private debugger: GUI
   // Setups a canvas camera
@@ -56,29 +58,22 @@ export default class BasicScene extends THREE.Scene{
   /**
    * Initializes the scene by adding lights, and the geometry
    */
-  public initialize(debug: boolean = true, addGridHelper: boolean = true){
+  public initialize(debug: boolean = true, addGridHelper: boolean = false){
+    // Setup grid helper
+    this.addGridHelper = addGridHelper
     // Setup camera
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000)
     this.camera.position.set(7, 4, 1)
     // Setup html
     this.canvas = (document.getElementById('app') as HTMLCanvasElement)
     this.plug = (document.getElementById('plug') as HTMLDivElement)
-    this.plug.style.backgroundImage = `url(assets/${this.ModelName}/plug.png)`
     this.plug.addEventListener('click', () => {
-      if(this.orbitals && this.model) {
+      if(this.model) {
         this.plug.style.display = 'none'
-        // this.orbitals.autoRotate = true
         this.model.visible = true
         setTimeout(() => {
           this.plug.style.display = 'block'
-          // this.orbitals.autoRotate = false
-          this.orbitals.maxPolarAngle = Math.PI / 2
-
-          const strMime = 'image/jpeg'
-          const imgData = this.renderer.domElement.toDataURL(strMime);
-
-          this.plug.style.backgroundImage = `url(${imgData})`
-          this.model.visible = false
+          this.screen()
         }, 15000)
       }
     })
@@ -88,33 +83,40 @@ export default class BasicScene extends THREE.Scene{
       canvas: this.canvas,
       alpha: true
     })
+    ;(this.renderer as any).setPixelRatio( window.devicePixelRatio )
     ;(this.renderer as any).shadowMap.enabled = true
     ;(this.renderer as any).shadowMap.type = THREE.PCFSoftShadowMap
     ;(this.renderer as any).toneMapping = THREE.ACESFilmicToneMapping
     ;(this.renderer as any).toneMappingExposure = 1
+    // ;(this.renderer as any).useLegacyLights = false
     this.renderer.setSize(this.width, this.height)
     // Add window resizing
     BasicScene.addWindowResizing(this.camera, this.renderer)
     // Sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
-    this.orbitals.minDistance = 2
-    this.orbitals.maxDistance = 10
-    this.orbitals.maxPolarAngle = Math.PI / 2
-    this.orbitals.target.set(0, 1, 0)
+    // this.orbitals.minDistance = 2
+    // this.orbitals.maxDistance = 10
+    // this.orbitals.maxPolarAngle = Math.PI / 2
+    // this.orbitals.target.set(0, 0, 0)
     // this.orbitals.enableZoom = false
     this.orbitals.enablePan = false
-    this.orbitals.enableDamping = false
+    this.orbitals.screenSpacePanning = false
+    this.orbitals.enableDamping = true;
+    this.orbitals.dampingFactor = 0.05;
+    this.orbitals.listenToKeyEvents( window );
+    // this.orbitals.enableDamping = false
     // this.orbitals.enabled = false
-    // this.orbitals.an
     // Set global illumination
-    const ambient = new THREE.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 )
+    const ambient = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 0.15)
     this.add( ambient )
     // Adds an origin-centered grid for visual reference
     if (addGridHelper){
       // Adds a grid
       this.add(new THREE.GridHelper(10, 10, 'red'))
-      // Adds an axis-helper
+      // Adds an axis helper
       this.add(new THREE.AxesHelper(3))
+      // Adds an spot light helper
+      this.add(this.spotLightHelper)
     }
     // Set path textures
     const loader = new THREE.TextureLoader().setPath( '../assets/textures/' )
@@ -144,30 +146,29 @@ export default class BasicScene extends THREE.Scene{
     this.spotLight.shadow.camera.fov = 1
     this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight, 0xff9900)
     this.add(this.spotLight)
-    this.add(this.spotLightHelper)
     // Creat floor
-    const planeGeometry = new THREE.PlaneGeometry(20, 20)
-    const planeMaterial = new THREE.MeshLambertMaterial({color: 0xcccccc})
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial)
-    plane.position.set( 0, 0, 0 )
-    plane.rotation.x = - Math.PI / 2
-    plane.receiveShadow = true
-    this.add(plane)
+    // const planeGeometry = new THREE.PlaneGeometry(20, 20)
+    // const planeMaterial = new THREE.MeshLambertMaterial({color: 0xcccccc})
+    // const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+    // plane.position.set( 0, 0, 0 )
+    // plane.rotation.x = - Math.PI / 2
+    // plane.receiveShadow = true
+    // this.add(plane)
     const hlight = new THREE.AmbientLight (0x404040, 1);
     this.add(hlight);
 
-    //??????????????????????? test
-    // const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
-    // directionalLight.position.set(-1000,1000,1000);
-    // this.add( directionalLight );
+    // Setup static light
+    const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+    directionalLight.position.set(-1000,1000,1000);
+    this.add( directionalLight );
 
-    // const dirlight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-    // dirlight2.position.set( -1000,-1000,-1000 );
-    // this.add( dirlight2 );
+    const dirlight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
+    dirlight2.position.set( -1000,-1000,-1000 );
+    this.add( dirlight2 );
 
-    // const light3 = new THREE.PointLight( 0xffffff, 0.3, 10000 );
-    // light3.position.set( 1000,-1000,1000 );
-    // this.add( light3 );
+    const light3 = new THREE.PointLight( 0xffffff, 0.3, 10000 );
+    light3.position.set( 1000,-1000,1000 );
+    this.add( light3 );
 
     // Set the background color
     this.background = new THREE.Color(0xcccccc)
@@ -176,11 +177,10 @@ export default class BasicScene extends THREE.Scene{
       gltf => {
         this.model = gltf.scene
         this.model.rotation.y = - Math.PI / 2
-        // this.model.visible = false
         this.model.traverse(() => {
           this.setModeleTexture(this.textures['M_Wood_BaseColor.png'])
         })
-        // this.camera.lookAt(this.model.position)
+        this.camera.lookAt(this.model.position)
         this.add(this.model)
       },
       xhr => {
@@ -272,12 +272,20 @@ export default class BasicScene extends THREE.Scene{
       }
     })
   }
+  public screen() {
+    const strMime = 'image/jpeg'
+    const imgData = this.renderer.domElement.toDataURL(strMime);
+    this.plug.style.backgroundImage = `url(${imgData})`
+    this.model.visible = false
+  }
   public render() {
     this.camera.updateProjectionMatrix()
     this.renderer.render(this, this.camera)
     TWEEN.update()
     this.orbitals.update()
-    this.spotLightHelper.update()
+    if (this.addGridHelper){
+      this.spotLightHelper.update()
+    }
   }
   public tween(light: THREE.SpotLight) {
     new TWEEN.Tween(light).to( {
@@ -287,9 +295,9 @@ export default class BasicScene extends THREE.Scene{
       .easing(TWEEN.Easing.Quadratic.Out).start();
 
     new TWEEN.Tween( light.position ).to({
-      x: (Math.random() * 1) + 1.5,
+      x: (Math.random() * 3) + 1.5,
       // y: ( Math.random() * 1 ) + 1.5,
-      z: (Math.random() * 1) + 1.5,
+      z: (Math.random() * 3) + 1.5,
     }, Math.random() * 3000 + 2000)
       .easing(TWEEN.Easing.Quadratic.Out).start();
   }

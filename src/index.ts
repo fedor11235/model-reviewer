@@ -3,10 +3,10 @@ import BasicScene from './BasicScene'
 const params = (new URL(window.location as any)).searchParams
 const modelName = params.get('model')
 
-// Sets up the scene
-let scene = new BasicScene(modelName);
-scene.initialize();
-scene.animate();
+// Setup up the scene
+let scene = new BasicScene(modelName)
+scene.initialize()
+scene.animate()
 // Loops updates
 function loop(){
   scene.render()
