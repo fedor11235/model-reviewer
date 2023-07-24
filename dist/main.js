@@ -106,7 +106,7 @@ class BasicScene extends THREE.Scene {
         this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000);
         this.camera.position.set(7, 4, 1);
         // Setup html
-        this.canvas = document.getElementById('app');
+        this.canvas = document.getElementById('3d-box');
         this.plug = document.getElementById('plug');
         this.plug.addEventListener('click', () => {
             if (this.model) {
@@ -160,7 +160,7 @@ class BasicScene extends THREE.Scene {
             this.add(this.spotLightHelper);
         }
         // Set path textures
-        const loader = new THREE.TextureLoader().setPath('../assets/textures/');
+        const loader = new THREE.TextureLoader().setPath('https://bytalent.ru/textures/');
         for (const filename of this.texturesName) {
             const texture = loader.load(filename);
             texture.minFilter = THREE.LinearFilter;
@@ -210,7 +210,7 @@ class BasicScene extends THREE.Scene {
         // Set the background color
         this.background = new THREE.Color(0xcccccc);
         // Load model
-        this.loaderModel.load(`../assets/${this.ModelName}/scene.gltf`, gltf => {
+        this.loaderModel.load(`https://bytalent.ru/${this.ModelName}/scene.gltf`, gltf => {
             this.model = gltf.scene;
             this.model.rotation.y = -Math.PI / 2;
             this.model.traverse(() => {
